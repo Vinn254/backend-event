@@ -89,8 +89,18 @@ router.post('/verify-otp', async (req, res) => {
   try {
     const { email, otp } = req.body;
 
-    const user = await User.findOne({ email, otp, otpExpires: { $gt: new Date() } });
+    const user = await User.findOne({ email });
     if (!user) {
+      return res.status(400).json({ message: 'User not found' });
+    }
+
+    if (user.isVerified) {
+      // Already verified, return success
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+      return res.json({ user, token });
+    }
+
+    if (!user.otp || user.otp !== otp || user.otpExpires < new Date()) {
       return res.status(400).json({ message: 'Invalid or expired OTP' });
     }
 

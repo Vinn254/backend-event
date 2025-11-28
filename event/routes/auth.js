@@ -2,6 +2,7 @@ const express = require('express');
 const User = require('../models/user');
 const { authMiddleware } = require('../middleware/authmiddleware');
 const jwt = require('jsonwebtoken');
+const jwtSecret = process.env.JWT_SECRET || 'default-jwt-secret-for-development';
 const generateOTP = require('../utils/generateotp');
 const { sendEmail } = require('../utils/sendemail');
 const { sendSMS } = require('../utils/sendsms');
@@ -75,7 +76,7 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ requiresVerification: true, user: { email: user.email } });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: user._id }, jwtSecret, { expiresIn: '7d' });
 
     res.json({ user, token });
   } catch (error) {
@@ -96,7 +97,7 @@ router.post('/verify-otp', async (req, res) => {
 
     if (user.isVerified) {
       // Already verified, return success
-      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+      const token = jwt.sign({ id: user._id }, jwtSecret, { expiresIn: '7d' });
       return res.json({ user, token });
     }
 
@@ -109,7 +110,7 @@ router.post('/verify-otp', async (req, res) => {
     user.otpExpires = undefined;
     await user.save();
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: user._id }, jwtSecret, { expiresIn: '7d' });
 
     res.json({ user, token });
   } catch (error) {

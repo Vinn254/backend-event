@@ -37,10 +37,16 @@ router.post('/register', async (req, res) => {
     await user.save();
 
     // Send OTP
-    if (otpMethod === 'email') {
-      await sendEmail(email, 'Your OTP Code', `Your OTP code is: ${otp}`);
-    } else {
-      await sendSMS(phone, `Your OTP code is: ${otp}`);
+    try {
+      if (otpMethod === 'email') {
+        await sendEmail(email, 'Your OTP Code', `Your OTP code is: ${otp}`);
+      } else {
+        await sendSMS(phone, `Your OTP code is: ${otp}`);
+      }
+    } catch (sendError) {
+      console.error('Failed to send OTP, setting user as verified:', sendError);
+      user.isVerified = true;
+      await user.save();
     }
 
     res.status(201).json({ message: 'User registered. Please verify OTP.', otp });

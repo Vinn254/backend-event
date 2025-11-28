@@ -12,7 +12,7 @@ connectDB();
 
 // Middleware
 // Allow configuring frontend origin in production via FRONTEND_URL env var
-const allowedOrigin = process.env.FRONTEND_URL || '*';
+const allowedOrigin = process.env.FRONTEND_URL || 'https://events-organizer-fr.netlify.app/';
 app.set('trust proxy', 1);
 app.use(cors({ origin: allowedOrigin, credentials: true }));
 app.use(express.json());
